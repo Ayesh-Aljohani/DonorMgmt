@@ -1,0 +1,30 @@
+{
+  "generationParameters": {
+    "generationDate": "Fri Dec 12 2025 21:32:16 GMT+0000 (Coordinated Universal Time)",
+    "generatorPlatform": "SAP Business Application Studio",
+    "serviceType": "Local CAP",
+    "metadataFilename": "",
+    "serviceUrl": "http://localhost:4004/service/donorMgmt/",
+    "appName": "donormgmt.donors",
+    "appTitle": "Donors",
+    "appDescription": "Donor Management ",
+    "appNamespace": "",
+    "ui5Theme": "sap_horizon",
+    "ui5Version": "1.120.13",
+    "showMockDataInfo": false,
+    "generatorVersion": "1.20.0",
+    "template": "List Report Page V4",
+    "generatorName": "SAP Fiori Application Generator",
+    "entityRelatedConfig": [
+      {
+        "type": "Main Entity",
+        "value": "Donors"
+      },
+      {
+        "type": "Navigation Entity",
+        "value": "donations"
+      }
+    ],
+    "launchText": "To launch the generated app, start your CAP project:  and navigate to the following location in your browser:\n\nhttp://localhost:4004/donormgmt.donors/webapp/index.html"
+  }
+}
