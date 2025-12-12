@@ -20,6 +20,30 @@ annotate service.Donors with @(
 
 annotate service.Donations with @(
     UI.LineItem #Donations : [
+        {
+            $Type : 'UI.DataField',
+            Value : campaign,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : cause,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : city,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : amount,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : currencyCode,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : donationDate,
+        },
     ]
 );
 
