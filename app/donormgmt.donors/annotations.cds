@@ -15,7 +15,27 @@ annotate service.Donors with @(
             ID : 'Donations',
             Target : 'donations/@UI.LineItem#Donations',
         },
-    ]
+        {
+            $Type : 'UI.ReferenceFacet',
+            Label : 'Summary & Next Steps',
+            ID : 'SummaryNextSteps',
+            Target : '@UI.FieldGroup#SummaryNextSteps',
+        },
+    ],
+    UI.FieldGroup #SummaryNextSteps : {
+        $Type : 'UI.FieldGroupType',
+        Data : [
+            {
+                $Type : 'UI.DataFieldForAction',
+                Action : 'donorMgmtSrv.DonorSummary',
+                Label : 'Generate Summary',
+            },
+            {
+                $Type : 'UI.DataField',
+                Value : summary,
+            },
+        ],
+    },
 );
 
 annotate service.Donations with @(
@@ -46,4 +66,11 @@ annotate service.Donations with @(
         },
     ]
 );
+
+annotate service.Donors with {
+    summary @(
+        UI.MultiLineText : true,
+        Common.FieldControl : #ReadOnly,
+    )
+};
 

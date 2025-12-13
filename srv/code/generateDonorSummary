@@ -1,0 +1,121 @@
+/*import cds from '@sap/cds'
+import { OrchestrationClient, buildAzureContentSafetyFilter } from '@sap-ai-sdk/orchestration'
+
+/**
+ *
+ * @On(event = { "generateDonorSummary" }, entity = "testBP_CampaignSrv.Donors")
+ * @param {cds.Request} request - User information, tenant-specific CDS model, headers and query parameters
+ */
+/*export default async function (request) {
+  const { Donors, Donations } = cds.entities
+  const donorID = request.params?.[0]?.ID
+
+  if (!donorID) return request.reject(400, 'Donor ID is required.')
+
+  // 1) Fetch donor (matches your Donors entity: ID, name, email, phone, status, donorType, isRecurringDonor, isHNI, summary, nextstep)
+  const donor = await SELECT.one.from(Donors).where({ ID: donorID })
+  if (!donor) return request.reject(404, 'Donor not found.')
+
+  // 2) Fetch donations linked to this donor (Donations has association field: donor : Donors)
+  // CAP typically materializes the FK as donor_ID
+  const donations = await SELECT.from(Donations).where({ donor_ID: donorID })
+  if (!donations || donations.length === 0) return request.reject(404, 'Donor has no donations.')
+
+  // 3) Build compact stats for the prompt (less token + more reliable)
+  const amounts = donations.map(d => Number(d.amount ?? 0)).filter(n => Number.isFinite(n))
+  const totalAmount = amounts.reduce((a, b) => a + b, 0)
+  const donationCount = donations.length
+
+  const dates = donations
+    .map(d => d.donationDate)
+    .filter(Boolean)
+    .map(d => new Date(d))
+    .filter(d => !Number.isNaN(d.getTime()))
+    .sort((a, b) => a - b)
+
+  const firstDonation = dates[0] ? dates[0].toISOString().slice(0, 10) : null
+  const lastDonation = dates[dates.length - 1] ? dates[dates.length - 1].toISOString().slice(0, 10) : null
+
+  const currencies = [...new Set(donations.map(d => d.currencyCode).filter(Boolean))]
+
+  // Send only the fields we actually need
+  const donorContext = {
+    ID: donor.ID,
+    name: donor.name,
+    email: donor.email,
+    phone: donor.phone,
+    status: donor.status,
+    donorType: donor.donorType,
+    isRecurringDonor: donor.isRecurringDonor,
+    isHNI: donor.isHNI
+  }
+
+  const donationContext = donations.map(d => ({
+    donationDate: d.donationDate,
+    amount: d.amount,
+    currencyCode: d.currencyCode,
+    city: d.city,
+    cause: d.cause,
+    campaign: d.campaign
+  }))
+
+  const filter = buildAzureContentSafetyFilter({
+    Hate: 'ALLOW_SAFE',
+    Violence: 'ALLOW_SAFE',
+    SelfHarm: 'ALLOW_SAFE',
+    Sexual: 'ALLOW_SAFE'
+  })
+
+  try {
+    const orchestrationClient = new OrchestrationClient({
+      model: { name: 'gpt-4o' },
+      filtering: { input: filter, output: filter },
+      prompt: {
+        template: [
+          {
+            role: 'system',
+            content:
+              'You are an expert donor insights writer for a nonprofit CRM. Produce a concise, factual donor summary for an internal donor profile page.'
+          },
+          {
+            role: 'user',
+            content: `Generate an internal donor profile summary (NOT an email) using the data below.
+
+Rules:
+- Max 120 words.
+- Use 3–5 short bullet points (no long paragraphs).
+- Must include: total donated, number of donations, first donation date (if available), last donation date (if available).
+- Mention any clear pattern (e.g., recurring, seasonal timing, repeated campaign/cause) ONLY if supported by data.
+- Do NOT include "next steps" or recommendations.
+- Do NOT invent any numbers or facts. If something is unknown, omit it.
+
+Donor:
+${JSON.stringify(donorContext, null, 2)}
+
+Donation stats:
+${JSON.stringify(
+  { donationCount, totalAmount, currencies, firstDonation, lastDonation },
+  null,
+  2
+)}
+
+Donation history (trimmed fields):
+${JSON.stringify(donationContext, null, 2)}`
+          }
+        ]
+      }
+    })
+
+    const response = await orchestrationClient.chatCompletion()
+    const generatedSummary = response.getContent()
+
+    // Save into Donors.summary (String(500) per your entity)
+    await UPDATE(Donors).set({ summary: generatedSummary }).where({ ID: donorID })
+
+    // Also return it to the UI
+    return generatedSummary
+  } catch (error) {
+    console.log(`Error while generating Donor Summary. Error: ${error}`)
+    throw error
+  }
+}*/

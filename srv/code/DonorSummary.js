@@ -1,11 +1,13 @@
+import cds from '@sap/cds'
 import { OrchestrationClient, buildAzureContentSafetyFilter } from '@sap-ai-sdk/orchestration'
 
 /**
-*
-* @On(event = { "generateDonorSummary" }, entity = "testBP_CampaignSrv.Donors")
-* @param {cds.Request} request - User information, tenant-specific CDS model, headers and query parameters
+ * Generate Donor Summary
+
+ * @On(event = { "DonorSummary" }, entity = "donorMgmtSrv.Donors")
+ * @param {cds.Request} request - User information, tenant-specific CDS model, headers and query parameters
 */
-export default async function(request) {
+export default async function (request) {
 const { Donors } = cds.entities;
 const { Donations } = cds.entities;
 const donorID = request.params[0].ID;
@@ -95,4 +97,5 @@ throw error;
 
 //LLM Call Ends
 
-};
+}
+

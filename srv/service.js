@@ -3,18 +3,19 @@
  * @version(2.0)
  */
 const LCAPApplicationService = require('@sap/low-code-event-handler');
+const donorSummary = require('./code/DonorSummary').default;
 const generateDonorEngagementRecommendation = require('./code/generateDonorEngagementRecommendation');
-const generateDonorSummary = require('./code/generateDonorSummary');
 
 class donorMgmtSrv extends LCAPApplicationService {
     async init() {
 
-        this.on('__undefined__', 'Donors', async (request, next) => {
-            return generateDonorEngagementRecommendation(request, next);
+        this.on('DonorSummary', 'Donors', async (request) => {
+            const donorsummary = await donorSummary(request);
+            console.log(`Donor Summary:${donorsummary}`);
         });
 
-        this.on('__undefined__', 'Donors', async (request, next) => {
-            return generateDonorSummary(request, next);
+        this.on('generateDonorEngagementRecommendation', 'Donors', async (request) => {
+            await generateDonorEngagementRecommendation(request);
         });
 
         return super.init();

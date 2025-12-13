@@ -1,98 +1,145 @@
+import cds from '@sap/cds'
 import { OrchestrationClient, buildAzureContentSafetyFilter } from '@sap-ai-sdk/orchestration'
 
 /**
-*
-* @On(event = { "generateDonorSummary" }, entity = "testBP_CampaignSrv.Donors")
-* @param {cds.Request} request - User information, tenant-specific CDS model, headers and query parameters
+ * 
+ * @On(event = { "" }, entity = "donorMgmtSrv.Donors")
+ * @param {cds.Request} request - User information, tenant-specific CDS model, headers and query parameters
+ * @param {Function} next - Callback function to the next handler
 */
-export default async function(request) {
-const { Donors } = cds.entities;
-const { Donations } = cds.entities;
-const donorID = request.params[0].ID;
+export default async function (request) {
+  const { Donors, Donations } = cds.entities
+  const donorID = request.params?.[0]?.ID
 
-if (!donorID) {
-return request.reject(400, 'Donor ID is required.');
-}
+  if (!donorID) return request.reject(400, 'Donor ID is required.')
 
-// Fetch the Donor details using the Donor ID
-const donor = await SELECT.one.from(Donors).where({ ID: donorID });
-if (!donor) {
-return request.reject(404, 'Donor not found.');
-}
+  const donor = await SELECT.one.from(Donors).where({ ID: donorID })
+  if (!donor) return request.reject(404, 'Donor not found.')
 
-// Fetch the Donation details using the Donor ID
-const donations = await SELECT.from(Donations).where({ donor_ID: donorID });
-if (!donations) {
-return request.reject(404, 'Donor has No Donations');
-}
+  const donations = await SELECT.from(Donations).where({ donor_ID: donorID })
+  if (!donations || donations.length === 0) return request.reject(404, 'Donor has no donations.')
 
-const resultDonor = JSON.stringify(donor, null, 2);
-const resultDonations = JSON.stringify(donations, null, 2);
+  // --- light stats for better recommendations ---
+  const amounts = donations.map(d => Number(d.amount ?? 0)).filter(n => Number.isFinite(n))
+  const totalAmount = amounts.reduce((a, b) => a + b, 0)
+  const donationCount = donations.length
 
-// Placeholder for LLM integration
-// Here you would call your LLM API with the title, cause, and goalAmount to generate a description
-// For example:
-// const generatedDescription = await callLLMApi(title, cause, goalAmount);
-//LLM Call Begins
-const chatModelName = 'gpt-4o';
-const resourceGroup = 'default';
+  const dates = donations
+    .map(d => d.donationDate)
+    .filter(Boolean)
+    .map(d => new Date(d))
+    .filter(d => !Number.isNaN(d.getTime()))
+    .sort((a, b) => a - b)
 
-const filter = buildAzureContentSafetyFilter({
-Hate: 'ALLOW_SAFE',
-Violence: 'ALLOW_SAFE',
-SelfHarm: 'ALLOW_SAFE',
-Sexual: 'ALLOW_SAFE',
-})
+  const firstDonation = dates[0] ? dates[0].toISOString().slice(0, 10) : null
+  const lastDonation = dates[dates.length - 1] ? dates[dates.length - 1].toISOString().slice(0, 10) : null
 
+  const currencies = [...new Set(donations.map(d => d.currencyCode).filter(Boolean))]
+  const topCampaigns = topN(donations.map(d => d.campaign).filter(Boolean), 3)
+  const topCauses = topN(donations.map(d => d.cause).filter(Boolean), 3)
 
-try {
-const orchestrationClient = new OrchestrationClient(
+  const donorContext = {
+    ID: donor.ID,
+    name: donor.name,
+    status: donor.status,
+    donorType: donor.donorType,
+    isRecurringDonor: donor.isRecurringDonor,
+    isHNI: donor.isHNI
+  }
+
+  const donationContext = donations.map(d => ({
+    donationDate: d.donationDate,
+    amount: d.amount,
+    currencyCode: d.currencyCode,
+    city: d.city,
+    cause: d.cause,
+    campaign: d.campaign
+  }))
+
+  const filter = buildAzureContentSafetyFilter({
+    Hate: 'ALLOW_SAFE',
+    Violence: 'ALLOW_SAFE',
+    SelfHarm: 'ALLOW_SAFE',
+    Sexual: 'ALLOW_SAFE'
+  })
+
+  try {
+    const orchestrationClient = new OrchestrationClient({
+      model: { name: 'gpt-4o' },
+      filtering: { input: filter, output: filter },
+      prompt: {
+        template: [
+          {
+            role: 'system',
+            content:
+              'You are a nonprofit CRM assistant. Your task is to recommend the single best next action to engage a donor, based strictly on donor profile + donation history. Be practical and specific.'
+          },
+          {
+            role: 'user',
+            content: `Choose ONE "next best action" for this donor.
+
+You must output ONLY valid JSON in this exact shape:
 {
-promptTemplating: {
-model: {
-name: chatModelName
-},
-prompt: {
-template: [
-{
-role: 'system',
-content: 'You are an expert fundraising copywriter specializing in nonprofit campaigns. Create compelling, donor-focused summary that inspire action.',
-},
-{
-role: 'user',
-content: `Generate a compelling donor summary based on donor data and donations made by the donor so far:
-Donation History : ${resultDonations}
-Donor Details: ${resultDonor}
-
-Create a persuasive, donor-focused summary that resonates with the donor's values.
-Highlight the importance of their contributions and the difference they make in the community.
-Highlight Total Donations made so far, identify donation durations/pattern if any.
-Suggest what I have to do interms of Next steps to engage the Donor to contribute more.
-Keep it concise (under 200 words)
-
-Write only the summary with various headers, Do not write it as email.`,
-}
-]
-}
-}
-}
-);
-const response = await orchestrationClient.chatCompletion();
-
-const generatedDescription = response.getContent();
-//console.log(`Successfully executed chat completion. ${generatedDescription}`);
-request.data.summary = generatedDescription;
-// Return the generated description
-return generatedDescription;
-}
-catch (error) {
-console.log(
-`Error while generating Donor Description.
-Error: ${error}`
-);
-throw error;
+  "action": "<one short action label>",
+  "reason": "<1-2 sentences, grounded in the data>",
+  "timing": "<when to do it>",
+  "messageDraft": "<2-4 sentences the user can copy/paste>"
 }
 
-//LLM Call Ends
+Constraints:
+- action MUST be one of:
+  ["Send Thank You Email","Invite to Annual Gala","Remind for Renewal","Call the Donor and discuss about new project","Request meeting with leadership","Share impact report","Invite to volunteer/visit","Ask for recurring donation setup"]
+- No hallucinations: if a detail is not in the data, don’t mention it.
+- Use donation recency/frequency/amounts + top causes/campaigns to justify.
+- If donor status is In-Active (or similar), prefer re-activation actions (call or impact report) over invites.
 
-};
+Donor:
+${JSON.stringify(donorContext, null, 2)}
+
+Donation stats:
+${JSON.stringify(
+  { donationCount, totalAmount, currencies, firstDonation, lastDonation, topCampaigns, topCauses },
+  null,
+  2
+)}
+
+Donation history (trimmed fields):
+${JSON.stringify(donationContext, null, 2)}`
+          }
+        ]
+      }
+    })
+
+    const response = await orchestrationClient.chatCompletion()
+    const nextStepJson = response.getContent()
+
+    // Save into Donors.nextstep (String(200) per your entity)
+    // (We store only the action label to fit 200 chars; keep full JSON returned to UI)
+    let actionLabel = nextStepJson
+    try {
+      const parsed = JSON.parse(nextStepJson)
+      if (parsed?.action) actionLabel = String(parsed.action).slice(0, 200)
+    } catch (_) {
+      // if model didn't return JSON, store raw truncated (still return raw to UI)
+      actionLabel = String(nextStepJson).slice(0, 200)
+    }
+
+    await UPDATE(Donors).set({ nextstep: actionLabel }).where({ ID: donorID })
+
+    return nextStepJson
+  } catch (error) {
+    console.log(`Error while generating Donor Next Step. Error: ${error}`)
+    throw error
+  }
+}
+
+/** helpers */
+function topN(values, n = 3) {
+  const m = new Map()
+  for (const v of values) m.set(v, (m.get(v) || 0) + 1)
+  return [...m.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, n)
+    .map(([value, count]) => ({ value, count }))
+}
+

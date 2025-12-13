@@ -13,7 +13,7 @@ service donorMgmtSrv
             )
             returns Donors;
 
-            action DonorEngagementRecommendation
+            action generateDonorEngagementRecommendation
             (
             )
             returns Donors;
