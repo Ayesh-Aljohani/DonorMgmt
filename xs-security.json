@@ -2,6 +2,7 @@
   "scopes": [],
   "attributes": [],
   "role-templates": [],
-  "xsappname": "donormgmt",
-  "teant-mode": "dedicated"
+  "xsappname": "DonorMgmt",
+  "tenant-mode": "dedicated"
 }
+ 
