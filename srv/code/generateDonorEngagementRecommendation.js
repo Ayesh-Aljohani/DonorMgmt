@@ -80,11 +80,11 @@ Write only the summary with various headers, Do not write it as email.`,
 const response = await orchestrationClient.chatCompletion();
 
 const generatedDescription = response.getContent();
-//console.log(`Successfully executed chat completion. ${generatedDescription}`);
+console.log(`Successfully executed chat completion. ${generatedDescription}`);
 // Assign the generated description to the summary property of the request data object
 //request.data.summary = generatedDescription;
 // Persist so the UI can display it
-await UPDATE(Donors).set({ summary: generatedDescription }).where({ ID: donorID });
+await UPDATE(Donors).set({ nextstep: generatedDescription }).where({ ID: donorID });
 // Return it as well (useful for debuggin
 // Return the generated description to the caller
 return generatedDescription;

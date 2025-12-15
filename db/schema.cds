@@ -18,7 +18,7 @@ entity Donors : cuid, managed
     isRecurringDonor : Boolean;
     isHNI : Boolean;
     summary : String(500);
-    nextstep : String(200);
+    nextstep : String(500);
     donations : Association to many Donations on donations.donor = $self;
 }
 

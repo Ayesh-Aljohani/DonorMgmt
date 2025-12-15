@@ -34,6 +34,64 @@ annotate service.Donors with @(
                 $Type : 'UI.DataField',
                 Value : summary,
             },
+            {
+                $Type : 'UI.DataField',
+                Value : nextstep,
+            },
+            {
+                $Type : 'UI.DataFieldForAction',
+                Action : 'donorMgmtSrv.generateDonorEngagementRecommendation',
+                Label : 'Generate Next Steps',
+            },
+        ],
+    },
+    UI.FieldGroup #Main : {
+        $Type : 'UI.FieldGroupType',
+        Data : [
+            {
+                $Type : 'UI.DataField',
+                Value : name,
+            },
+            {
+                $Type : 'UI.DataField',
+                Value : email,
+            },
+            {
+                $Type : 'UI.DataField',
+                Value : phone,
+            },
+            {
+                $Type : 'UI.DataField',
+                Value : status,
+            },
+            {
+                $Type : 'UI.DataField',
+                Value : donorType,
+            },
+            {
+                $Type : 'UI.DataField',
+                Value : isRecurringDonor,
+            },
+            {
+                $Type : 'UI.DataField',
+                Value : isHNI,
+            },
+            {
+                $Type : 'UI.DataField',
+                Value : createdAt,
+            },
+            {
+                $Type : 'UI.DataField',
+                Value : createdBy,
+            },
+            {
+                $Type : 'UI.DataField',
+                Value : modifiedAt,
+            },
+            {
+                $Type : 'UI.DataField',
+                Value : modifiedBy,
+            },
         ],
     },
 );
@@ -69,6 +127,13 @@ annotate service.Donations with @(
 
 annotate service.Donors with {
     summary @(
+        UI.MultiLineText : true,
+        Common.FieldControl : #ReadOnly,
+    )
+};
+
+annotate service.Donors with {
+    nextstep @(
         UI.MultiLineText : true,
         Common.FieldControl : #ReadOnly,
     )
