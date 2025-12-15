@@ -1,13 +1,11 @@
-import cds from '@sap/cds'
 import { OrchestrationClient, buildAzureContentSafetyFilter } from '@sap-ai-sdk/orchestration'
 
 /**
- * Generate Donor Summary
-
- * @On(event = { "DonorSummary" }, entity = "donorMgmtSrv.Donors")
- * @param {cds.Request} request - User information, tenant-specific CDS model, headers and query parameters
+*
+* @On(event = { "generateDonorSummary" }, entity = "testBP_CampaignSrv.Donors")
+* @param {cds.Request} request - User information, tenant-specific CDS model, headers and query parameters
 */
-export default async function (request) {
+export default async function(request) {
 const { Donors } = cds.entities;
 const { Donations } = cds.entities;
 const donorID = request.params[0].ID;
@@ -83,8 +81,12 @@ const response = await orchestrationClient.chatCompletion();
 
 const generatedDescription = response.getContent();
 //console.log(`Successfully executed chat completion. ${generatedDescription}`);
-request.data.summary = generatedDescription;
-// Return the generated description
+// Assign the generated description to the summary property of the request data object
+//request.data.summary = generatedDescription;
+// Persist so the UI can display it
+await UPDATE(Donors).set({ summary: generatedDescription }).where({ ID: donorID });
+// Return it as well (useful for debuggin
+// Return the generated description to the caller
 return generatedDescription;
 }
 catch (error) {
@@ -97,5 +99,5 @@ throw error;
 
 //LLM Call Ends
 
-}
+};
 

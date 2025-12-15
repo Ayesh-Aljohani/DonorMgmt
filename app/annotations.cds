@@ -1,4 +1,5 @@
 using { donorMgmtSrv } from '../srv/service.cds';
+//using donorMgmtSrv from '../srv/service';
 
 annotate donorMgmtSrv.Donors with @UI.HeaderInfo: { TypeName: 'Donor', TypeNamePlural: 'Donors', Title: { Value: name } };
 annotate donorMgmtSrv.Donors with {
@@ -191,4 +192,11 @@ annotate donorMgmtSrv.Donations with @UI.Facets: [
 annotate donorMgmtSrv.Donations with @UI.SelectionFields: [
   donor_ID
 ];
+
+annotate donorMgmtSrv.Donors actions {
+  DonorSummary @(
+    Common.SideEffects: { TargetProperties: ['summary'] }
+  );
+};
+
 
