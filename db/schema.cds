@@ -18,8 +18,11 @@ entity Donors : cuid, managed
     isRecurringDonor : Boolean;
     isHNI : Boolean;
     summary : String(500);
-    nextstep : String(200);
+    nextstep : String(500);
     donations : Association to many Donations on donations.donor = $self;
+    donationLikelihoodScore : Decimal(28,0)
+        @Core.Description : 'decimal donation Likelihood Score';
+    donationLikelihoodLabel : String(100);
 }
 
 annotate Donors with @assert.unique :

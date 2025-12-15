@@ -56,21 +56,32 @@ prompt: {
 template: [
 {
 role: 'system',
-content: 'You are an expert fundraising copywriter specializing in nonprofit campaigns. Create compelling, donor-focused summary that inspire action.',
+content: 'You are a nonprofit CRM assistant. Your task is to recommend ONE clear, practical next best action to engage a donor, based strictly on their profile and donation history.',
 },
 {
 role: 'user',
-content: `Generate a compelling donor summary based on donor data and donations made by the donor so far:
-Donation History : ${resultDonations}
-Donor Details: ${resultDonor}
+content: `Recommend ONE next best action for this donor.
 
-Create a persuasive, donor-focused summary that resonates with the donor's values.
-Highlight the importance of their contributions and the difference they make in the community.
-Highlight Total Donations made so far, identify donation durations/pattern if any.
-Suggest what I have to do interms of Next steps to engage the Donor to contribute more.
-Keep it concise (under 200 words)
+Rules:
+- Output MUST be exactly ONE short sentence.
+- Start with a verb (e.g., "Send", "Invite", "Call", "Remind", "Share").
+- Base the recommendation ONLY on the data below (recency, frequency, causes, campaigns).
+- Be realistic and actionable for a fundraiser.
+- Do NOT explain your reasoning.
+- Do NOT include multiple options.
+- Do NOT use bullet points, headers, or extra text.
 
-Write only the summary with various headers, Do not write it as email.`,
+Examples of valid outputs:
+- "Send a thank-you email acknowledging their recent contribution."
+- "Invite the donor to the upcoming annual gala."
+- "Call the donor to discuss a new project aligned with their interests."
+- "Remind the donor about renewing their recurring donation."
+
+Donor Details:
+${resultDonor}
+
+Donation History:
+${resultDonations}`,
 }
 ]
 }
@@ -84,7 +95,7 @@ const generatedDescription = response.getContent();
 // Assign the generated description to the summary property of the request data object
 //request.data.summary = generatedDescription;
 // Persist so the UI can display it
-await UPDATE(Donors).set({ summary: generatedDescription }).where({ ID: donorID });
+await UPDATE(Donors).set({ nextstep: generatedDescription }).where({ ID: donorID });
 // Return it as well (useful for debuggin
 // Return the generated description to the caller
 return generatedDescription;
