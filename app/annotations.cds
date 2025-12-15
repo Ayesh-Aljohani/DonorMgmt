@@ -199,4 +199,10 @@ annotate donorMgmtSrv.Donors actions {
   );
 };
 
+annotate donorMgmtSrv.Donors with @UI.Identification: [
+  { $Type: 'UI.DataField', Value: name },
+  { $Type: 'UI.DataFieldForAction', Action: 'donorMgmtSrv.generateDonorEngagementRecommendation', Label: 'Generate Engagement Recommendation' }
+];
+
+
 

@@ -4,7 +4,8 @@
  */
 const LCAPApplicationService = require('@sap/low-code-event-handler');
 const donorSummary = require('./code/DonorSummary').default;
-const generateDonorEngagementRecommendation = require('./code/generateDonorEngagementRecommendation');
+//const generateDonorEngagementRecommendation = require('./code/generateDonorEngagementRecommendation');
+const generateDonorEngagementRecommendation = require('./code/generateDonorEngagementRecommendation').default;
 
 class donorMgmtSrv extends LCAPApplicationService {
     async init() {
