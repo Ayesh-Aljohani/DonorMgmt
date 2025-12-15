@@ -56,21 +56,24 @@ prompt: {
 template: [
 {
 role: 'system',
-content: 'You are an expert fundraising copywriter specializing in nonprofit campaigns. Create compelling, donor-focused summary that inspire action.',
+content: 'You are a nonprofit CRM assistant. Write a very short internal donor summary using ONLY the provided donor profile and donation history. Do not guess or add details.',
 },
 {
 role: 'user',
-content: `Generate a compelling donor summary based on donor data and donations made by the donor so far:
-Donation History : ${resultDonations}
-Donor Details: ${resultDonor}
+content: `Write a donor summary in EXACTLY 2–3 lines (not bullets, not headers, not an email).
 
-Create a persuasive, donor-focused summary that resonates with the donor's values.
-Highlight the importance of their contributions and the difference they make in the community.
-Highlight Total Donations made so far, identify donation durations/pattern if any.
-Suggest what I have to do interms of Next steps to engage the Donor to contribute more.
-Keep it concise (under 200 words)
+Rules:
+- Mention total donated + number of donations (if derivable from data).
+- Mention recency (last donation date or "Not available").
+- Mention the main cause/campaign focus if visible; otherwise say "Not available".
+- No "next steps", no recommendations, no extra formatting.
+- Use ONLY the data below. If something is missing, say "Not available".
 
-Write only the summary with various headers, Do not write it as email.`,
+Donation History:
+${resultDonations}
+
+Donor Details:
+${resultDonor}`,
 }
 ]
 }
