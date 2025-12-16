@@ -17,6 +17,11 @@ service donorMgmtSrv
             (
             )
             returns Donors;
+
+            action donationLikelihoodScore
+            (
+            )
+            returns Donors;
         };
 
     @odata.draft.enabled

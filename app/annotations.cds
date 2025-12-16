@@ -207,4 +207,8 @@ annotate donorMgmtSrv.Donors actions {
 
 
 
-
+annotate donorMgmtSrv.Donors actions {
+  donationLikelihoodScore @(
+    Common.SideEffects: { TargetProperties: ['donationLikelihoodScore, donationLikelihoodLabel'] }
+  );
+};

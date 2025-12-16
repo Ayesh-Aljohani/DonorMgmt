@@ -7,6 +7,7 @@ const donorSummary = require('./code/DonorSummary').default;
 //const generateDonorEngagementRecommendation = require('./code/generateDonorEngagementRecommendation');
 const generateDonorEngagementRecommendation = require('./code/generateDonorEngagementRecommendation').default;
 
+const donationLikelihoodScore = require('./code/donationLikelihoodScore').default;
 class donorMgmtSrv extends LCAPApplicationService {
     async init() {
 
@@ -17,6 +18,11 @@ class donorMgmtSrv extends LCAPApplicationService {
 
         this.on('generateDonorEngagementRecommendation', 'Donors', async (request) => {
             await generateDonorEngagementRecommendation(request);
+        });
+
+        this.on('donationLikelihoodScore', 'Donors', async (request) => {
+            console.log('Processing donation likelihood score...');
+            await donationLikelihoodScore(request);
         });
 
         return super.init();

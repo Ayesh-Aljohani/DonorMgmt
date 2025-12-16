@@ -35,13 +35,30 @@ annotate service.Donors with @(
                 Value : summary,
             },
             {
-                $Type : 'UI.DataField',
-                Value : nextstep,
-            },
-            {
                 $Type : 'UI.DataFieldForAction',
                 Action : 'donorMgmtSrv.generateDonorEngagementRecommendation',
                 Label : 'Generate Next Steps',
+            },
+            {
+                $Type : 'UI.DataField',
+                Value : nextstep,
+            },
+
+            // ✅ Predict Likelihood button + show results
+            {
+                $Type : 'UI.DataFieldForAction',
+                Action : 'donorMgmtSrv.donationLikelihoodScore',
+                Label : 'Predict Donation Likelihood',
+            },
+            {
+                $Type : 'UI.DataField',
+                Label : 'Donation Likelihood',
+                Value : donationLikelihoodLabel,
+            },
+            {
+                $Type : 'UI.DataField',
+                Label : 'Likelihood Score',
+                Value : donationLikelihoodScore,
             },
         ],
     },
@@ -129,13 +146,28 @@ annotate service.Donors with {
     summary @(
         UI.MultiLineText : true,
         Common.FieldControl : #ReadOnly,
-    )
-};
-
-annotate service.Donors with {
+    );
     nextstep @(
         UI.MultiLineText : true,
         Common.FieldControl : #ReadOnly,
-    )
+    );
+
+    // ✅ Likelihood fields
+    donationLikelihoodLabel @(
+        Common.FieldControl : #ReadOnly,
+    );
+    donationLikelihoodScore @(
+        Common.FieldControl : #ReadOnly,
+    );
 };
 
+annotate donorMgmtSrv.Donors actions {
+    donationLikelihoodScore @(
+        Common.SideEffects : {
+            TargetProperties : [
+                'donationLikelihoodScore',
+                'donationLikelihoodLabel'
+            ]
+        }
+    );
+};
