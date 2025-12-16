@@ -53,8 +53,8 @@ export default async function (request) {
 Rules:
 - score must be an integer 0..100
 - label must match score bands:
-  - High: 70..100
-  - Medium: 40..69
+  - High: 85..100
+  - Medium: 40..84
   - Low: 0..39
 - Base decision mostly on:
   recency (how long since last donation), frequency, consistency over time, donation patterns.
@@ -94,8 +94,8 @@ ${resultDonations}`
     }
 
     // Enforce bands
-    if (label === 'High' && score < 70) score = 70
-    if (label === 'Medium' && (score < 40 || score > 69)) score = 55
+    if (label === 'High' && score < 85) score = 70
+    if (label === 'Medium' && (score < 84 || score > 69)) score = 55
     if (label === 'Low' && score > 39) score = 20
 
     // Persist for UI
